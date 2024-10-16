@@ -79,14 +79,17 @@ class Brush():
 
 
 
+
     def displayPoints(self):
 
-        for personLocation in Brush.peopleMade:
-            pygame.draw.circle(self.SCREEN.screen, Paint.typeColours[self.grid[personLocation[0]][personLocation[1]]],
-                               (personLocation[0]*14 + self.nodeSize / 2, personLocation[1]*14 + self.nodeSize / 2), self.nodeSize / 2)
+        for personLocation in Brush.people:
+            pygame.draw.circle(self.SCREEN.screen,(30, 50, 200) ,
+                               (personLocation.realPos[0] + self.nodeSize / 2, personLocation.realPos[1] + self.nodeSize / 2), self.nodeSize / 2)
         for targetLocation in Brush.targetsMade:
             pygame.draw.rect(self.SCREEN.screen, Paint.typeColours[self.grid[targetLocation[0]][targetLocation[1]]],
                              (targetLocation[0]*14, targetLocation[1]*14, self.nodeSize, self.nodeSize))
+        self.drawWalls()
+    def drawWalls(self):
         for wallLocation in Brush.wallsMade:
             pygame.draw.rect(self.SCREEN.screen, Paint.typeColours[self.grid[wallLocation[0]][wallLocation[1]]],
                              (wallLocation[0]*14, wallLocation[1]*14, self.nodeSize, self.nodeSize))
@@ -102,8 +105,8 @@ def createGrid(SCREEN,gridSize,nodeSize):
     return grid
 
 def pallet():
-    wall = Paint("wall", (30,30,30))
-    people = Paint("people", (30, 50, 200),font= 13,shape = 2)
-    target = Paint("target", (30, 200, 50),font= 12)
+    Paint("wall", (30,30,30))
+    Paint("people", (30, 50, 200),font= 13,shape = 2)
+    Paint("target", (30, 200, 50),font= 12)
 
 

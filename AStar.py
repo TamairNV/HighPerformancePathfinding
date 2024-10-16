@@ -14,6 +14,7 @@ class node:
        self.pos = pos
        self.state = state
        self.path = []
+       self.pathID = 0
 
 
    def resetNode(self,state):
@@ -22,6 +23,7 @@ class node:
        self.g_cost = 0
        self.h_cost = 0
        self.state = state
+       self.path = []
 
    def __lt__(self, other):
        return self.f_cost < other.f_cost
@@ -46,11 +48,12 @@ class node:
        if self == endnode:
            self.TraceBack()
            return True
-
+       self.pathID = endnode.pathID
        self.state = "p"
        for i in range(self.x - 1, self.x + 2):
            for j in range(self.y - 1, self.y + 2):
                if (i >= 0 and i < len(grid)) and (j >= 0 and j < len(grid[0])):  #
+
                    if grid[i][j] != self and (grid[i][j].state == "" or grid[i][j].state == "t"):
                        grid[i][j].parent = self
                        grid[i][j].g_cost = self.g_cost + grid[i][j].minDistance(self)

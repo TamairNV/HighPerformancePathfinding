@@ -7,13 +7,13 @@ import Painter
 import Grid
 import time
 import json
+import random
 pygame.init()
 
-
+clock = pygame.time.Clock()
 class Screen:
 
     def __init__(self, height, width, name):
-
         self.height = height
         self.width = width
         self.name = name
@@ -24,16 +24,9 @@ class Screen:
         pygameInput.Input.startListening()
         self.position = dataS.Vector2(0, 0)
         self.frameRate = 1200
+
 SCREEN = Screen(750,1000,"Pathfinding")
 pygameInput.Input.screen = SCREEN
-class Time:
-
-    clock = pygame.time.Clock()
-    deltaTime = 0
-
-    @staticmethod
-    def tick(frameRateCap):
-        Time.deltaTime = Time.clock.tick(frameRateCap) / 1000.0  # Convert milliseconds to seconds
 
 
 def CreateSidePannel():
@@ -43,12 +36,9 @@ AStarRunning = False
 
 def Run():#34
     n = time.time()
-    for target in Painter.Brush.targetsMade:
-        for person in Painter.Brush.people:
-            person.grid.resetGrid(person.grid,grid)
-
-        for person in Painter.Brush.people:
-            person.Run(target, SCREEN.screen)
+    PathingObject.Entity.targets =Painter.Brush.targetsMade
+    for person in Painter.Brush.people:
+        person.Run(Painter.Brush.targetsMade[random.randint(0,len(Painter.Brush.targetsMade))-1],SCREEN.screen,grid)
     print(time.time()-n)
 
 def drawGrid(grid):
@@ -105,10 +95,10 @@ Painter.Brush.grid = grid
 brush = Painter.Brush(SCREEN,(700,840),14,grid)
 Painter.Paint.brush = brush
 while running:
-    Time.tick(SCREEN.frameRate)
-    if len(Painter.Brush.people) == 0:
-        SCREEN.screen.fill((255, 255, 255))
-        Painter.createGrid(SCREEN, (700, 840), 14)
+
+    clock.tick(24)
+    SCREEN.screen.fill((200, 150, 200))
+    #Painter.createGrid(SCREEN, (700, 840), 14)
     SCREEN.events = pygame.event.get()
     pygameInput.keysPressed = pygame.key.get_pressed()
     brush.draw()
@@ -120,8 +110,12 @@ while running:
             pygame.quit()
 
 
-    UI.Element.updateAllElements()
+    for objects in PathingObject.Entity.pathingObjects:
+        objects.stepPath(SCREEN.screen,grid)
 
+
+
+    UI.Element.updateAllElements()
     pygameInput.Input.keysPressedLastFrame = pygame.key.get_pressed()
     pygame.display.flip()
 
