@@ -9,7 +9,7 @@ class Paint():
     paints = []
     SCREEN = None
     brush = None
-    typeColours = {'wall': (30, 30, 30), 'people': (30, 50, 200), 'target': (30, 200, 50)}
+    typeColours = {'w': (30, 30, 30), 'people': (30, 50, 200), 'target': (30, 200, 50)}
 
     def __init__(self,ID,colour,font = 16,shape = 1):
         Paint.paints.append(self)
@@ -75,7 +75,7 @@ class Brush():
 
             elif self.currentBrush == "target":
                 Brush.targetsMade.append((nearestX, nearestY))
-            elif self.currentBrush == "wall":
+            elif self.currentBrush == "w":
                 Brush.wallsMade.append((nearestX, nearestY))
                 self.newWalls = True
 
@@ -111,7 +111,7 @@ def createGrid(SCREEN,gridSize,nodeSize):
     return grid
 
 def pallet():
-    Paint("wall", (30,30,30))
+    Paint("w", (30,30,30))
     Paint("people", (30, 50, 200),font= 13,shape = 2)
     Paint("target", (30, 200, 50),font= 12)
 

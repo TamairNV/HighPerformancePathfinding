@@ -11,6 +11,18 @@ import random
 pygame.init()
 
 clock = pygame.time.Clock()
+
+font = pygame.font.SysFont(None, 30)
+def drawFPSCounter(screen, clock):
+    fps = int(clock.get_fps())  # Get FPS as an integer
+    fps_text = font.render(f"FPS: {fps}", True, (255, 255, 255))  # Render FPS text
+    screen.blit(fps_text, (10, 10))  # Draw FPS counter at the top-left corner
+
+def drawPathsPerSecond(screen, pathsPerSecond):
+
+    fps_text = font.render(f"PPS: {pathsPerSecond}", True, (255, 255, 255))  # Render FPS text
+    screen.blit(fps_text, (10, 25))  # Draw FPS counter at the top-left corner
+
 class Screen:
 
     def __init__(self, height, width, name):
@@ -35,11 +47,10 @@ def CreateSidePannel():
 AStarRunning = False
 
 def Run():#34
-    n = time.time()
     PathingObject.Entity.targets =Painter.Brush.targetsMade
     for person in Painter.Brush.people:
         person.Run(Painter.Brush.targetsMade[random.randint(0,len(Painter.Brush.targetsMade))-1],SCREEN.screen,grid)
-    print(time.time()-n)
+
 
 def drawGrid(grid):
     for row in range(len(grid[0])):
@@ -60,6 +71,17 @@ def Save():
         json.dump(grid, file)
 
 
+import threading
+import json
+
+
+def loadPerson(x, y):
+    person = PathingObject.Entity((x, y))
+    Painter.Brush.entities[(x, y)] = person
+    Painter.Brush.people.append(person)
+    person.grid = Grid.Grid(Painter.Brush.grid)
+
+
 def Load(grid):
     with open("two.json", 'r') as file:
         loaded_grid = json.load(file)
@@ -67,23 +89,31 @@ def Load(grid):
     grid.clear()
     grid.extend(loaded_grid)
 
+    threads = []
+
     for x in range(len(grid)):
         for y in range(len(grid[x])):
 
             if grid[x][y] == "people":
                 Painter.Brush.peopleMade.append((x, y))
-                person = PathingObject.Entity((x, y))
-                Painter.Brush.entities[(x, y)] = person
-                Painter.Brush.people.append(person)
-                person.grid = Grid.Grid(Painter.Brush.grid)
+
+
+                thread = threading.Thread(target=loadPerson, args=(x, y))
+                threads.append(thread)
+                thread.start()
 
             elif grid[x][y] == "target":
                 Painter.Brush.targetsMade.append((x, y))
-            elif grid[x][y] == "wall":
+            elif grid[x][y] == "w":
                 Painter.Brush.wallsMade.append((x, y))
+
+    for thread in threads:
+        thread.join()
 
     for person in Painter.Brush.people:
         person.grid.resetGrid(person.grid, Painter.Brush.grid)
+
+
 running = True
 startButton = UI.Button(SCREEN, (900, 0), (100, 100), "Start", (200, 200, 200),Run)
 saveButton = UI.Button(SCREEN, (900, 100), (100, 100), "Save", (200, 200, 200),Save)
@@ -96,15 +126,18 @@ SCREEN.screen.fill((255, 255, 255))
 Painter.Brush.grid = grid
 brush = Painter.Brush(SCREEN,(700,840),14,grid)
 Painter.Paint.brush = brush
+timer = time.time()
+totalTime = 0
+pps  = 0
 while running:
 
-    clock.tick(24)
+    clock.tick()
     SCREEN.screen.fill((200, 150, 200))
     #Painter.createGrid(SCREEN, (700, 840), 14)
     SCREEN.events = pygame.event.get()
     pygameInput.keysPressed = pygame.key.get_pressed()
     brush.draw()
-    brush.displayPoints()
+
     Painter.Paint.update()
     for event in SCREEN.events:
         if event.type == pygame.QUIT:
@@ -118,11 +151,23 @@ while running:
             objects.stepPath(SCREEN.screen, grid,draw = True)
         else:
             objects.stepPath(SCREEN.screen, grid)
+        if pygame.mouse.get_pressed()[0]:
+            if i ==0 :
+                pos = pygame.mouse.get_pos()
+                var = objects.grid.grid[round(pos[0] // 14)][round(pos[1] // 14)]
+                print(var.state,var.pos)
 
 
+    brush.displayPoints()
 
     UI.Element.updateAllElements()
     pygameInput.Input.keysPressedLastFrame = pygame.key.get_pressed()
+    if totalTime == 0 and PathingObject.Entity.running:
+        totalTime = time.time()
+    if totalTime > 1:
+        drawPathsPerSecond(SCREEN.screen, round(PathingObject.Entity.totalPaths / (time.time() - totalTime)))
+
+    drawFPSCounter(SCREEN.screen, clock)
     pygame.display.flip()
 
 

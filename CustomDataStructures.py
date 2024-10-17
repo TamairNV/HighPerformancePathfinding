@@ -155,10 +155,3 @@ class PriorityQueue:
     def is_empty(self):
         return len(self.heap) == 0
 
-# Example usage:
-class Node:
-    def __init__(self, f_cost):
-        self.f_cost = f_cost
-
-    def __lt__(self, other):
-        return self.f_cost < other.f_cost
