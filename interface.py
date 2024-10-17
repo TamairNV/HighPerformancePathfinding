@@ -8,6 +8,7 @@ import Grid
 import time
 import json
 import random
+import math
 pygame.init()
 
 clock = pygame.time.Clock()
@@ -20,8 +21,16 @@ def drawFPSCounter(screen, clock):
 
 def drawPathsPerSecond(screen, pathsPerSecond):
 
-    fps_text = font.render(f"PPS: {pathsPerSecond}", True, (255, 255, 255))  # Render FPS text
-    screen.blit(fps_text, (10, 25))  # Draw FPS counter at the top-left corner
+    PPS = font.render(f"PPS: {pathsPerSecond}", True, (255, 255, 255))
+    screen.blit(PPS, (10, 25))
+    timePerPath = font.render(f"timePerPath: {str(1/pathsPerSecond)[:6]}", True, (255, 255, 255))
+    screen.blit(timePerPath, (10, 40))
+    ObjectCount = font.render(f"ObjectCount: {len(Painter.Brush.people)}", True, (255, 255, 255))
+    screen.blit(ObjectCount, (10, 55))
+    pathsMade = font.render(f"pathsMade: {PathingObject.Entity.totalPaths}", True, (255, 255, 255))
+    screen.blit(pathsMade, (10, 70))
+
+
 
 class Screen:
 
@@ -65,7 +74,7 @@ def drawGrid(grid):
 
 
 Painter.Paint.SCREEN= SCREEN
-grid = Painter.createGrid(SCREEN,(700,840),14)
+grid = Painter.createGrid(SCREEN,(60,60),14)
 def Save():
     with open("two.json", 'w') as file:
         json.dump(grid, file)
@@ -137,7 +146,8 @@ while running:
     SCREEN.events = pygame.event.get()
     pygameInput.keysPressed = pygame.key.get_pressed()
     brush.draw()
-
+    pygame.draw.rect(SCREEN.screen, (255, 255, 255), (840, 0, 2, 700))
+    pygame.draw.rect(SCREEN.screen, (255, 255, 255), (0, 700, 840, 2))
     Painter.Paint.update()
     for event in SCREEN.events:
         if event.type == pygame.QUIT:
@@ -147,15 +157,10 @@ while running:
 
     for i,objects in enumerate(PathingObject.Entity.pathingObjects):
         objects.stepPath(SCREEN.screen,grid)
-        if i == 0 :
+        if i == 0 and False:
             objects.stepPath(SCREEN.screen, grid,draw = True)
         else:
             objects.stepPath(SCREEN.screen, grid)
-        if pygame.mouse.get_pressed()[0]:
-            if i ==0 :
-                pos = pygame.mouse.get_pos()
-                var = objects.grid.grid[round(pos[0] // 14)][round(pos[1] // 14)]
-                print(var.state,var.pos)
 
 
     brush.displayPoints()

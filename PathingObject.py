@@ -9,7 +9,7 @@ import time
 
 class Entity():
     pathNumber = 0
-    speed = 14
+    speed = 7
     pathingObjects = []
     targets = []
     running = False
@@ -24,9 +24,6 @@ class Entity():
         self.targets = []
         self.thread = None
         self.lastTarget = None
-        self.nodesToReset = []
-
-
 
 
     def Run(self,target,screen,baseGrid):
@@ -43,8 +40,10 @@ class Entity():
 
         pQueue = dataS.PriorityQueue()
         pQueue.push(start)
-        targetNode.pathID +=1
-        start.pathID +=1
+        targetNode.pathID = Entity.totalPaths
+        start.pathID = targetNode.pathID
+
+
 
 
         while not pQueue.pop().expandParent(self.grid.grid,targetNode,pQueue,baseGrid):
@@ -60,7 +59,7 @@ class Entity():
         self.followPath()
         Entity.totalPaths +=1
         for node in pQueue.heap:
-            node[1].resetNode("")
+            node[1].resetNode(baseGrid[node[1].pos[0]][node[1].pos[1]])
 
     def followPath(self):
         self.completedPath = False
@@ -77,7 +76,7 @@ class Entity():
                 if self.pathI >= len(self.path)-1:
                     self.completedPath = True
                     for node in self.path:
-                        node.resetNode("")
+                        node.resetNode(baseGrid[node.pos[0]][node.pos[1]])
                         pass
                     self.thread = threading.Thread(target=self.runInThread, args=(screen, baseGrid))
                     self.thread.start()
@@ -104,11 +103,11 @@ class Entity():
         for x in range(len(self.grid.grid[0])):
             for y in range(len(self.grid.grid[1])):
                 if self.grid.grid[x][y].state == "d":
-                    pygame.draw.rect(screen,(255,255,0),(x*14,y*14,14,14))
+                    pygame.draw.rect(screen,self.generateColor(self.grid.grid[x][y].pathID),(x*14,y*14,14,14))
                 if self.grid.grid[x][y].state == "p":
-                    pygame.draw.rect(screen,(255,10,255),(x*14,y*14,14,14))
+                    pygame.draw.rect(screen,self.generateColor(self.grid.grid[x][y].pathID),(x*14,y*14,14,14))
                 if self.grid.grid[x][y].state == "l":
-                    pygame.draw.rect(screen,(10,255,255),(x*14,y*14,14,14))
+                    pygame.draw.rect(screen,self.generateColor(self.grid.grid[x][y].pathID),(x*14,y*14,14,14))
 
 
     def getDir(self, point1, point2,speed):

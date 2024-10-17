@@ -82,7 +82,8 @@ class Brush():
         if not pygame.mouse.get_pressed()[0] and self.newWalls:
             self.newWalls = False
             for person in Brush.people:
-                person.grid.resetGrid(person.grid, Brush.grid)
+                #person.grid.resetGrid(person.grid, Brush.grid)
+                pass
 
 
 
