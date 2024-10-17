@@ -82,6 +82,8 @@ def Load(grid):
             elif grid[x][y] == "wall":
                 Painter.Brush.wallsMade.append((x, y))
 
+    for person in Painter.Brush.people:
+        person.grid.resetGrid(person.grid, Painter.Brush.grid)
 running = True
 startButton = UI.Button(SCREEN, (900, 0), (100, 100), "Start", (200, 200, 200),Run)
 saveButton = UI.Button(SCREEN, (900, 100), (100, 100), "Save", (200, 200, 200),Save)
@@ -110,8 +112,12 @@ while running:
             pygame.quit()
 
 
-    for objects in PathingObject.Entity.pathingObjects:
+    for i,objects in enumerate(PathingObject.Entity.pathingObjects):
         objects.stepPath(SCREEN.screen,grid)
+        if i == 0 :
+            objects.stepPath(SCREEN.screen, grid,draw = True)
+        else:
+            objects.stepPath(SCREEN.screen, grid)
 
 
 

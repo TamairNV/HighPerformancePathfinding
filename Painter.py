@@ -57,6 +57,7 @@ class Brush():
         self.nodeSize = nodeSize
         self.grid = grid
         self.SCREEN = SCREEN
+        self.newWalls = True
 
     def draw(self):
         x,y = pygame.mouse.get_pos()
@@ -76,7 +77,12 @@ class Brush():
                 Brush.targetsMade.append((nearestX, nearestY))
             elif self.currentBrush == "wall":
                 Brush.wallsMade.append((nearestX, nearestY))
+                self.newWalls = True
 
+        if not pygame.mouse.get_pressed()[0] and self.newWalls:
+            self.newWalls = False
+            for person in Brush.people:
+                person.grid.resetGrid(person.grid, Brush.grid)
 
 
 

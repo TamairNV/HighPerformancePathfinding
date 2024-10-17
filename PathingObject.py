@@ -21,26 +21,36 @@ class Entity():
         self.completedPath = False
         self.targets = []
         self.thread = None
+        self.lastTarget = None
 
 
-    def resetGrid(self):
-        for x in range(len(self.grid.grid[0])):
-            for y in range(len(self.grid.grid[1])):
-                self.grid[x][y].resetNode()
+
 
     def Run(self,target,screen,baseGrid):
-        self.grid.resetGrid(self.grid, baseGrid)
+        #self.grid.resetGrid(self.grid, baseGrid)
         targetNode = self.grid.grid[target[0]][target[1]]
-        targetNode.state = "t"
+        targetNode.resetNode("t")
+
+
         self.pos = (int(self.realPos[0]//14),int(self.realPos[1]//14))
         start = self.grid.grid[self.pos[0]][self.pos[1]]
-        start.state = "s"
+        start.resetNode("s")
+
 
         pQueue = dataS.PriorityQueue()
         pQueue.push(start)
         targetNode.pathID +=1
-        while not pQueue.pop().expandParent(self.grid.grid,targetNode,pQueue):
-            pass
+        start.pathID +=1
+
+        try:
+            while not pQueue.pop().expandParent(self.grid.grid,targetNode,pQueue,baseGrid):
+                pass
+        except:
+            self.grid.resetGrid(self.grid, baseGrid)
+            print("error")
+            self.Run(target,screen,baseGrid)
+            return
+
 
         #self.drawPath(targetNode.path,screen)
         targetNode.path.reverse()
@@ -54,7 +64,9 @@ class Entity():
 
 
 
-    def stepPath(self,screen,baseGrid):
+    def stepPath(self,screen,baseGrid,draw = False):
+        if draw:
+            self.drawGrid(screen)
         if not self.completedPath:
             if math.fabs(self.realPos[0] - self.path[self.pathI].x*14 ) < 2 and math.fabs(self.realPos[1] - self.path[self.pathI].y*14 ) < 2:
                 if self.pathI >= len(self.path)-1:
@@ -71,8 +83,22 @@ class Entity():
             self.realPos = (self.realPos[0] + dir[0],self.realPos[1] + dir[1])
 
     def runInThread(self, screen, baseGrid):
-        target = Entity.targets[random.randint(0, len(Entity.targets) - 1)]
-        self.Run(target, screen, baseGrid)
+
+        newTarget = Entity.targets[random.randint(0, len(Entity.targets) - 1)]
+        while newTarget == self.lastTarget:
+            newTarget = Entity.targets[random.randint(0, len(Entity.targets) - 1)]
+
+        self.lastTarget = newTarget
+        self.Run(newTarget, screen, baseGrid)
+
+    def drawGrid(self,screen):
+        for x in range(len(self.grid.grid[0])):
+            for y in range(len(self.grid.grid[1])):
+                if self.grid.grid[x][y].state == "d":
+                    pygame.draw.rect(screen,(255,255,0),(x*14,y*14,14,14))
+                if self.grid.grid[x][y].state == "p":
+                    pygame.draw.rect(screen,(255,10,255),(x*14,y*14,14,14))
+
 
     def getDir(self, point1, point2,speed):
         dx = point2[0] - point1[0]
