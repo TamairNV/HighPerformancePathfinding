@@ -10,14 +10,14 @@ import json
 import random
 import math
 pygame.init()
-
+CELLSIZE = Grid.Grid.CELLSIZE
 clock = pygame.time.Clock()
 
 font = pygame.font.SysFont(None, 30)
 def drawFPSCounter(screen, clock):
     fps = int(clock.get_fps())  # Get FPS as an integer
     fps_text = font.render(f"FPS: {fps}", True, (255, 255, 255))  # Render FPS text
-    screen.blit(fps_text, (10, 10))  # Draw FPS counter at the top-left corner
+    screen.blit(fps_text, (10, 10))
 
 def drawPathsPerSecond(screen, pathsPerSecond):
 
@@ -29,6 +29,15 @@ def drawPathsPerSecond(screen, pathsPerSecond):
     screen.blit(ObjectCount, (10, 55))
     pathsMade = font.render(f"pathsMade: {PathingObject.Entity.totalPaths}", True, (255, 255, 255))
     screen.blit(pathsMade, (10, 70))
+
+    pathsCached = font.render(f"pathsCached: {PathingObject.Entity.pathsCached}", True, (255, 255, 255))
+    screen.blit(pathsCached, (10, 85))
+
+    cacheCollected = font.render(f"cacheCollected: {PathingObject.Entity.pathsCollectedFromCache}", True, (255, 255, 255))
+    screen.blit(cacheCollected, (10, 100))
+
+    reverseCachedCollected = font.render(f"reverseCachedCollected: {PathingObject.Entity.reversePathsCollectedFromCache}", True, (255, 255, 255))
+    screen.blit(reverseCachedCollected, (10, 115))
 
 
 
@@ -64,17 +73,17 @@ def Run():#34
 def drawGrid(grid):
     for row in range(len(grid[0])):
         for col in range(len(grid[1])):
-            nearestX = round(row * 14)
-            nearestY = round(col * 14)
+            nearestX = round(row * CELLSIZE)
+            nearestY = round(col * CELLSIZE)
 
             if grid[row][col].state == "p":
-                pygame.draw.rect(SCREEN.screen, (255,0,0),(nearestX, nearestY, 14, 14))
+                pygame.draw.rect(SCREEN.screen, (255,0,0),(nearestX, nearestY, CELLSIZE, CELLSIZE))
             if grid[row][col].state == "d":
-                pygame.draw.rect(SCREEN.screen, (255,255,0),(nearestX, nearestY, 14, 14))
+                pygame.draw.rect(SCREEN.screen, (255,255,0),(nearestX, nearestY, CELLSIZE, CELLSIZE))
 
 
 Painter.Paint.SCREEN= SCREEN
-grid = Painter.createGrid(SCREEN,(60,60),14)
+grid = Painter.createGrid(SCREEN,(int(840/CELLSIZE),int(840/CELLSIZE)),CELLSIZE)
 def Save():
     with open("two.json", 'w') as file:
         json.dump(grid, file)
@@ -133,7 +142,7 @@ SCREEN.screen.fill((255, 255, 255))
 
 
 Painter.Brush.grid = grid
-brush = Painter.Brush(SCREEN,(700,840),14,grid)
+brush = Painter.Brush(SCREEN,(700,840),CELLSIZE,grid)
 Painter.Paint.brush = brush
 timer = time.time()
 totalTime = 0
@@ -142,7 +151,7 @@ while running:
 
     clock.tick()
     SCREEN.screen.fill((200, 150, 200))
-    #Painter.createGrid(SCREEN, (700, 840), 14)
+
     SCREEN.events = pygame.event.get()
     pygameInput.keysPressed = pygame.key.get_pressed()
     brush.draw()

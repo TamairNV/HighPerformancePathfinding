@@ -5,11 +5,13 @@ import pygame
 import UI
 import PathingObject
 import Grid
+CELLSIZE = Grid.Grid.CELLSIZE
 class Paint():
     paints = []
     SCREEN = None
     brush = None
     typeColours = {'w': (30, 30, 30), 'people': (30, 50, 200), 'target': (30, 200, 50)}
+
 
     def __init__(self,ID,colour,font = 16,shape = 1):
         Paint.paints.append(self)
@@ -61,9 +63,9 @@ class Brush():
 
     def draw(self):
         x,y = pygame.mouse.get_pos()
-        nearestX = round((x - 7) / self.nodeSize)
-        nearestY = round((y - 7) / self.nodeSize)
-        if x >= 0 and x <= self.gridSize[1]-6 and y >= 0 and y <= self.gridSize[0]-6 and pygame.mouse.get_pressed()[0] and self.grid[nearestX][nearestY] == "":
+        nearestX = round((x - CELLSIZE/2) / self.nodeSize)
+        nearestY = round((y - CELLSIZE/2) / self.nodeSize)
+        if x >= 0 and x <= self.gridSize[1]-CELLSIZE/2 and y >= 0 and y <= self.gridSize[0]-CELLSIZE/2 and pygame.mouse.get_pressed()[0] and self.grid[nearestX][nearestY] == "":
 
             self.grid[nearestX][nearestY] = self.currentBrush
             if self.currentBrush == "people":
@@ -81,9 +83,8 @@ class Brush():
 
         if not pygame.mouse.get_pressed()[0] and self.newWalls:
             self.newWalls = False
-            for person in Brush.people:
-                #person.grid.resetGrid(person.grid, Brush.grid)
-                pass
+            PathingObject.Entity.cache.reset()
+
 
 
 
@@ -94,12 +95,12 @@ class Brush():
                                (personLocation.realPos[0] + self.nodeSize / 2, personLocation.realPos[1] + self.nodeSize / 2), self.nodeSize / 2)
         for targetLocation in Brush.targetsMade:
             pygame.draw.rect(self.SCREEN.screen, Paint.typeColours[self.grid[targetLocation[0]][targetLocation[1]]],
-                             (targetLocation[0]*14, targetLocation[1]*14, self.nodeSize, self.nodeSize))
+                             (targetLocation[0]*CELLSIZE, targetLocation[1]*CELLSIZE, self.nodeSize, self.nodeSize))
         self.drawWalls()
     def drawWalls(self):
         for wallLocation in Brush.wallsMade:
             pygame.draw.rect(self.SCREEN.screen, Paint.typeColours[self.grid[wallLocation[0]][wallLocation[1]]],
-                             (wallLocation[0]*14, wallLocation[1]*14, self.nodeSize, self.nodeSize))
+                             (wallLocation[0]*CELLSIZE, wallLocation[1]*CELLSIZE, self.nodeSize, self.nodeSize))
 
 
 def createGrid(SCREEN,gridSize,nodeSize):

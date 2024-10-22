@@ -4,20 +4,29 @@ import math
 import random
 import threading
 import time
-
+import Cache
+import Grid
+import copy
 
 
 class Entity():
+
     pathNumber = 0
-    speed = 7
+
     pathingObjects = []
     targets = []
     running = False
     totalPaths = 0
+    cache = Cache.cache()
+    pathsCached = 0
+    pathsCollectedFromCache = 0
+    reversePathsCollectedFromCache = 0
+    CELLSIZE = Grid.Grid.CELLSIZE
+    speed = CELLSIZE/10
     def __init__(self,location):
         self.pos = location
         self.grid = None
-        self.realPos = (self.pos[0] * 14, self.pos[1] * 14)
+        self.realPos = (self.pos[0] * Entity.CELLSIZE, self.pos[1] * Entity.CELLSIZE)
         self.pathI = 0
         self.path = []
         self.completedPath = False
@@ -32,11 +41,9 @@ class Entity():
         targetNode = self.grid.grid[target[0]][target[1]]
         targetNode.resetNode("t")
 
-
-        self.pos = (int(self.realPos[0]//14),int(self.realPos[1]//14))
+        self.pos = (int(self.realPos[0] // Entity.CELLSIZE), int(self.realPos[1] // Entity.CELLSIZE))
         start = self.grid.grid[self.pos[0]][self.pos[1]]
         start.resetNode("s")
-
 
         pQueue = dataS.PriorityQueue()
         pQueue.push(start)
@@ -72,7 +79,7 @@ class Entity():
         if draw:
             self.drawGrid(screen)
         if not self.completedPath:
-            if math.fabs(self.realPos[0] - self.path[self.pathI].pos[0]*14 ) < 2 and math.fabs(self.realPos[1] - self.path[self.pathI].pos[1]*14 ) < 2:
+            if math.fabs(self.realPos[0] - self.path[self.pathI].pos[0]*Entity.CELLSIZE ) < 2 and math.fabs(self.realPos[1] - self.path[self.pathI].pos[1]*Entity.CELLSIZE ) < 2:
                 if self.pathI >= len(self.path)-1:
                     self.completedPath = True
                     for node in self.path:
@@ -86,7 +93,7 @@ class Entity():
                 self.pathI +=1
 
 
-            dir = self.getDir(self.realPos,(self.path[self.pathI].pos[0]*14,self.path[self.pathI].pos[1]*14),Entity.speed)
+            dir = self.getDir(self.realPos,(self.path[self.pathI].pos[0]*Entity.CELLSIZE,self.path[self.pathI].pos[1]*Entity.CELLSIZE),Entity.speed)
 
             self.realPos = (self.realPos[0] + dir[0],self.realPos[1] + dir[1])
 
@@ -103,11 +110,11 @@ class Entity():
         for x in range(len(self.grid.grid[0])):
             for y in range(len(self.grid.grid[1])):
                 if self.grid.grid[x][y].state == "d":
-                    pygame.draw.rect(screen,self.generateColor(self.grid.grid[x][y].pathID),(x*14,y*14,14,14))
+                    pygame.draw.rect(screen,self.generateColor(self.grid.grid[x][y].pathID),(x*Entity.CELLSIZE,y*Entity.CELLSIZE,Entity.CELLSIZE,Entity.CELLSIZE))
                 if self.grid.grid[x][y].state == "p":
-                    pygame.draw.rect(screen,self.generateColor(self.grid.grid[x][y].pathID),(x*14,y*14,14,14))
+                    pygame.draw.rect(screen,self.generateColor(self.grid.grid[x][y].pathID),(x*Entity.CELLSIZE,y*Entity.CELLSIZE,Entity.CELLSIZE,Entity.CELLSIZE))
                 if self.grid.grid[x][y].state == "l":
-                    pygame.draw.rect(screen,self.generateColor(self.grid.grid[x][y].pathID),(x*14,y*14,14,14))
+                    pygame.draw.rect(screen,self.generateColor(self.grid.grid[x][y].pathID),(x*Entity.CELLSIZE,y*Entity.CELLSIZE,Entity.CELLSIZE,Entity.CELLSIZE))
 
 
     def getDir(self, point1, point2,speed):
@@ -125,7 +132,7 @@ class Entity():
     def drawPath(self,path,screen):
         Entity.pathNumber+=1
         for i in range(len(path)-1):
-            pygame.draw.line(screen,self.generateColor(Entity.pathNumber),(path[i].pos[0]*14+7,path[i].pos[1]*14+7),(path[i+1].pos[0]*14+7,path[i+1].pos[1]*14+7),3)
+            pygame.draw.line(screen,self.generateColor(Entity.pathNumber),(path[i].pos[0]*Entity.CELLSIZE+Entity.CELLSIZE/2,path[i].pos[1]*Entity.CELLSIZE+Entity.CELLSIZE/2),(path[i+1].pos[0]*Entity.CELLSIZE+Entity.CELLSIZE/2,path[i+1].pos[1]*Entity.CELLSIZE+Entity.CELLSIZE/2),3)
 
         pygame.display.flip()
 
