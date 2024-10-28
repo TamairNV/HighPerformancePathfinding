@@ -22,7 +22,7 @@ class Entity():
     pathsCollectedFromCache = 0
     reversePathsCollectedFromCache = 0
     CELLSIZE = Grid.Grid.CELLSIZE
-    speed = CELLSIZE/10
+    speed = CELLSIZE
     def __init__(self,location):
         self.pos = location
         self.grid = None
@@ -40,7 +40,6 @@ class Entity():
         #self.grid.resetGrid(self.grid, baseGrid)
         targetNode = self.grid.grid[target[0]][target[1]]
         targetNode.resetNode("t")
-
         self.pos = (int(self.realPos[0] // Entity.CELLSIZE), int(self.realPos[1] // Entity.CELLSIZE))
         start = self.grid.grid[self.pos[0]][self.pos[1]]
         start.resetNode("s")
@@ -65,8 +64,6 @@ class Entity():
         self.path = targetNode.path
         self.followPath()
         Entity.totalPaths +=1
-        for node in pQueue.heap:
-            node[1].resetNode(baseGrid[node[1].pos[0]][node[1].pos[1]])
 
     def followPath(self):
         self.completedPath = False
@@ -82,9 +79,7 @@ class Entity():
             if math.fabs(self.realPos[0] - self.path[self.pathI].pos[0]*Entity.CELLSIZE ) < 2 and math.fabs(self.realPos[1] - self.path[self.pathI].pos[1]*Entity.CELLSIZE ) < 2:
                 if self.pathI >= len(self.path)-1:
                     self.completedPath = True
-                    for node in self.path:
-                        node.resetNode(baseGrid[node.pos[0]][node.pos[1]])
-                        pass
+
                     self.thread = threading.Thread(target=self.runInThread, args=(screen, baseGrid))
                     self.thread.start()
                     self.pathI = 0

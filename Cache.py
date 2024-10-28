@@ -20,15 +20,14 @@ class cache:
         self.cacheID +=1
 
     def hashPath(self,startNode,endNode):
-        return (startNode.pos[0],startNode.pos[1],
-                endNode.pos[0],endNode.pos[1])
+        return (startNode,endNode)
 
     def get(self,startNode,endNode):
         hash = self.hashPath(startNode,endNode)
         reverseHash = self.hashPath(endNode,startNode)
         if hash in self.dict and self.dict[hash].cacheID == self.cacheID:
             return (self.dict[hash].path, 0)
-        return None
+
         if reverseHash in self.dict and self.dict[reverseHash].cacheID == self.cacheID:
             reversed_path = copy.deepcopy(self.dict[reverseHash].path)[::-1]
             return (reversed_path, 1)
